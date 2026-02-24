@@ -27,9 +27,9 @@ import ghidra.app.script.ScriptInfo;
 public class ScriptsModel extends DefaultSearchListModel<ScriptInfo> {
 
 	private List<ScriptInfo> allScripts;
-	private LinkedList<String> recentScriptNames;
+	private List<String> recentScriptNames;
 
-	public ScriptsModel(List<ScriptInfo> allScripts, LinkedList<String> recentScriptNames) {
+	public ScriptsModel(List<ScriptInfo> allScripts, List<String> recentScriptNames) {
 		this.allScripts = allScripts;
 		this.recentScriptNames = recentScriptNames != null ? recentScriptNames : new LinkedList<>();
 		populateModel();
@@ -42,7 +42,7 @@ public class ScriptsModel extends DefaultSearchListModel<ScriptInfo> {
 			scriptMap.put(script.getName(), script);
 		}
 
-		// Add recent scripts first (in MRU order)
+		// Add recent scripts first (these should be sorted by most recently used)
 		List<ScriptInfo> recentScripts = new ArrayList<>();
 		Set<String> addedScripts = new HashSet<>();
 		for (String recentName : recentScriptNames) {

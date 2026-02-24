@@ -293,9 +293,9 @@ class GhidraScriptActionManager {
 			initialScript = lastRunScript.getName();
 		}
 
-		ScriptSelectionDialog dialog =
-			new ScriptSelectionDialog(plugin, scriptInfos, provider.getRecentScripts(),
-				initialScript);
+		List<String> recentScripts = provider.getRecentScripts();
+		ScriptSelectionDialog dialog = new ScriptSelectionDialog(plugin, scriptInfos, recentScripts,
+			initialScript);
 		dialog.show();
 
 		ScriptInfo chosenInfo = dialog.getUserChoice();

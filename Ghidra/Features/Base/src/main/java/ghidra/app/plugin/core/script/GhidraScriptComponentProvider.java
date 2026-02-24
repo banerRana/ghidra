@@ -54,8 +54,7 @@ import ghidra.framework.options.SaveState;
 import ghidra.framework.plugintool.ComponentProviderAdapter;
 import ghidra.program.model.listing.Program;
 import ghidra.util.*;
-import ghidra.util.datastruct.WeakDataStructureFactory;
-import ghidra.util.datastruct.WeakSet;
+import ghidra.util.datastruct.*;
 import ghidra.util.table.GhidraTableFilterPanel;
 import ghidra.util.task.*;
 import util.CollectionUtils;
@@ -90,7 +89,7 @@ public class GhidraScriptComponentProvider extends ComponentProviderAdapter {
 	private String[] previousCategory;
 
 	private ResourceFile lastRunScript;
-	private LinkedList<String> recentScripts = new LinkedList<>();
+	private LRUSet<String> recentScripts = new LRUSet<String>(MAX_RECENT_SCRIPTS);
 	private WeakSet<RunScriptTask> runningScriptTaskSet =
 		WeakDataStructureFactory.createCopyOnReadWeakSet();
 	private TaskListener cleanupTaskSetListener = new TaskListener() {
@@ -342,7 +341,7 @@ public class GhidraScriptComponentProvider extends ComponentProviderAdapter {
 		String filterText = tableFilterPanel.getFilterText();
 		saveState.putString(FILTER_TEXT, filterText);
 
-		String[] scripts = recentScripts.toArray(new String[0]);
+		String[] scripts = recentScripts.toList().toArray(new String[0]);
 		saveState.putStrings(RECENT_SCRIPTS, scripts);
 	}
 
@@ -376,8 +375,8 @@ public class GhidraScriptComponentProvider extends ComponentProviderAdapter {
 		return editorMap;
 	}
 
-	LinkedList<String> getRecentScripts() {
-		return recentScripts;
+	List<String> getRecentScripts() {
+		return recentScripts.toList();
 	}
 
 	void assignKeyBinding() {
@@ -657,7 +656,8 @@ public class GhidraScriptComponentProvider extends ComponentProviderAdapter {
 			}
 		}
 		catch (IOException e) {
-			Msg.showError(this, getComponent(), getName(), e.getMessage(), e);
+			Msg.showError(this, getComponent(), getName(), "Unexpected exception loading script",
+				e);
 		}
 	}
 
@@ -683,12 +683,7 @@ public class GhidraScriptComponentProvider extends ComponentProviderAdapter {
 
 		// Update recent scripts list
 		String scriptName = scriptFile.getName();
-		recentScripts.remove(scriptName);
-		recentScripts.addFirst(scriptName);  // Add to front (most recent)
-
-		while (recentScripts.size() > MAX_RECENT_SCRIPTS) {
-			recentScripts.removeLast();
-		}
+		recentScripts.add(scriptName);
 
 		GhidraScript script = doGetScriptInstance(scriptFile);
 		if (script != null) {
