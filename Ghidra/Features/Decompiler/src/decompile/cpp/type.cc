@@ -1174,10 +1174,10 @@ void TypePointer::calcSubmeta(void)
 {
   type_metatype ptrtoMeta = ptrto->getMetatype();
   if (ptrtoMeta == TYPE_STRUCT) {
-    if (ptrto->numDepend() > 1 || ptrto->isIncomplete())
-      submeta = SUB_PTR_STRUCT;
+    if (ptrto->needsResolution())
+      submeta = SUB_PTR;	// Treat as a more generic pointer, allowing pointer to the component to take precedence
     else
-      submeta = SUB_PTR;
+      submeta = SUB_PTR_STRUCT;
   }
   else if (ptrtoMeta == TYPE_UNION) {
     submeta = SUB_PTR_STRUCT;
