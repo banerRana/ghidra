@@ -81,6 +81,7 @@ public class BookmarkDBAdapterV3 extends BookmarkDBAdapter {
 						if (version >= 0 && schemaVersion != version) {
 							throw new IOException("Inconsistent bookmark table versions");
 						}
+						version = schemaVersion;
 					}
 					tables[id] = table;
 				}
